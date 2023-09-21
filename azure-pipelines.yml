@@ -1,0 +1,86 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  -group : aks
+
+stages:
+  - stage: tfVallidate
+    jobs:
+      - job: vaidate
+        continueOnError: false
+        steps:
+          #terraform install
+          - task: TerraformInstaller@1
+            displayName: tfinstall
+            inputs:
+              terraformVersion: 'latest'
+          
+          #terraform init
+          - task: TerraformTaskV4@4
+            displayName: Terraform Init
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'aks connection'
+              backendAzureRmResourceGroupName: '$(strAccRgName)'
+              backendAzureRmStorageAccountName: '$(strAccName)'
+              backendAzureRmContainerName: '$(strContainer)'
+              backendAzureRmKey: '$(strKey)'
+          
+          #Terraform validate
+          - task: TerraformTaskV4@4
+            displayName: Terrafrom Validate
+            inputs:
+              provider: 'azurerm'
+              command: 'validate'
+
+  - stage: tfDeploy
+    condition: succeeded('tfVallidate')
+    dependsOn: tfVallidate
+    
+    jobs:
+      - job: Apply
+        steps: 
+        #Terraform install
+        - task: TerraformInstaller@1
+          displayName: tfinstall
+          inputs:
+            terraformVersion: 'latest'
+      
+        #Terraform init
+        - task: TerraformTaskV4@4
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'aks connection'
+            backendAzureRmResourceGroupName: '$(strAccRgName)'
+            backendAzureRmStorageAccountName: '$(strAccName)'
+            backendAzureRmContainerName: '$(strContainer)'
+            backendAzureRmKey: '$(strKey)'
+        
+        #Terraform plan
+        - task: TerraformTaskV4@4
+          displayName: Plan
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            environmentServiceNameAzureRM: 'aks connection'
+        
+        #Terraform Apply
+        - task: TerraformTaskV4@4
+          displayName: Apply
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            environmentServiceNameAzureRM: 'aks connection'
+
+
