@@ -25,15 +25,14 @@ stages:
           
           #terraform init
           - task: TerraformTaskV4@4
-            displayName: Terraform Init
             inputs:
               provider: 'azurerm'
               command: 'init'
               backendServiceArm: 'aks connection'
-              backendAzureRmResourceGroupName: '$(strAccRgName)'
-              backendAzureRmStorageAccountName: '$(strAccName)'
-              backendAzureRmContainerName: '$(strContainer)'
-              backendAzureRmKey: '$(strKey)'
+              backendAzureRmResourceGroupName: 'mtc-rg'
+              backendAzureRmStorageAccountName: 'mtstr32444'
+              backendAzureRmContainerName: 'tfstate'
+              backendAzureRmKey: 'devpipeline.terraform.tfstate'
           
           #Terraform validate
           - task: TerraformTaskV4@4
@@ -57,30 +56,27 @@ stages:
       
         #Terraform init
         - task: TerraformTaskV4@4
-          displayName: Terraform Init
           inputs:
             provider: 'azurerm'
             command: 'init'
             backendServiceArm: 'aks connection'
-            backendAzureRmResourceGroupName: '$(strAccRgName)'
-            backendAzureRmStorageAccountName: '$(strAccName)'
-            backendAzureRmContainerName: '$(strContainer)'
-            backendAzureRmKey: '$(strKey)'
+            backendAzureRmResourceGroupName: 'mtc-rg'
+            backendAzureRmStorageAccountName: 'mtstr32444'
+            backendAzureRmContainerName: 'tfstate'
+            backendAzureRmKey: 'devpipeline.terraform.tfstate'
         
         #Terraform plan
         - task: TerraformTaskV4@4
-          displayName: Plan
           inputs:
             provider: 'azurerm'
             command: 'plan'
-            environmentServiceNameAzureRM: 'aks connection'
+            environmentServiceNameAzureRM: 'Azure for Students(d8026e85-c3a9-4a33-acb5-88d88c4daf6c)'
         
         #Terraform Apply
         - task: TerraformTaskV4@4
-          displayName: Apply
           inputs:
             provider: 'azurerm'
             command: 'apply'
-            environmentServiceNameAzureRM: 'aks connection'
+            environmentServiceNameAzureRM: 'Azure for Students(d8026e85-c3a9-4a33-acb5-88d88c4daf6c)'
 
 
